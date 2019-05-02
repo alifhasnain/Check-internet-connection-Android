@@ -1,7 +1,8 @@
 # Check-internet-connection-Android
 
-Bellow Class will handle internet connection availablit in background. Just create the instance of this class as global variable. Then add
+Bellow Class will handle internet connection availability in background. Create the instance of this class in your activity class as a global variable. 
 
+### CheckInternetConnection.java
 ```java
 import android.os.Handler;
 import android.os.Looper;
@@ -18,6 +19,8 @@ public class CheckInternetConnection  {
     private Thread mConnectionCheckerThread;
 
     private boolean stopThread = false;
+
+    private int mUpdateInterval = 3000;
 
     public CheckInternetConnection() {
 
@@ -39,13 +42,13 @@ public class CheckInternetConnection  {
 
                         updateListenerInMainThread(true);
 
-                        sleep(3000);
+                        sleep(mUpdateInterval);
 
                     } catch (IOException e) {
 
                         updateListenerInMainThread(false);
 
-                        sleep(3000);
+                        sleep(mUpdateInterval);
                     }
                 }
             }
@@ -53,6 +56,14 @@ public class CheckInternetConnection  {
 
         mConnectionCheckerThread.setPriority(3);
 
+    }
+
+    public int getUpdateInterval() {
+        return mUpdateInterval;
+    }
+
+    public void setUpdateInterval(int updateIntervalInMillis) {
+        this.mUpdateInterval = updateIntervalInMillis;
     }
 
     private void updateListenerInMainThread(final boolean connectionAvailability)   {
@@ -89,3 +100,45 @@ interface ConnectionChangeListener   {
     void onConnectionChanged(boolean isConnectionAvailable);
 }
 ```
+
+Then add `addConnectionChangeListener` to `onStart()` to listen connection change.
+
+```java
+.......
+.....
+
+private boolean connectionAvailable = true;
+
+........
+.....
+
+@Override
+    protected void onStart() {
+        super.onStart();
+
+        connectionChecker.addConnectionChangeListener(new ConnectionChangeListener() {
+            @Override
+            public void onConnectionChanged(boolean isConnectionAvailable) {
+                if(connectionAvailable && !isConnectionAvailable) {
+                    Toast.makeText(MainActivity.this, "No internet connection not available!", Toast.LENGTH_SHORT).show();
+                    connectionAvailable = false;
+                }
+                else if(!connectionAvailable && isConnectionAvailable) {
+                    Toast.makeText(MainActivity.this, "Internet connection is back again.", Toast.LENGTH_SHORT).show();
+                    connectionAvailable = true;
+                }
+            }
+        });
+    }
+ ```
+ 
+ You should also remove the listener in your `onPause()` and `onStop()` method or it will be keep running on a background thread and waste battery.
+ 
+ ```java
+ @Override
+    protected void onPause() {
+        super.onPause();
+        connectionChecker.removeConnectionChangeListener();
+    }
+ ```
+ 

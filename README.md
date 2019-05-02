@@ -101,7 +101,7 @@ interface ConnectionChangeListener   {
 }
 ```
 
-Then add `addConnectionChangeListener` to `onStart()` to listen connection change.
+Then add `addConnectionChangeListener` to `onStart()` to listen connection change. By default it will listen to connection change after 3000 millisecond (3 second). But this update interval can be set manually by calling `setUpdateInterval()` method.
 
 ```java
 .......

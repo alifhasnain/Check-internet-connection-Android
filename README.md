@@ -87,8 +87,8 @@ public class CheckInternetConnection  {
 
     public void addConnectionChangeListener(ConnectionChangeListener connectionChangeListener) {
         this.connectionChangeListener = connectionChangeListener;
-        mConnectionCheckerThread.start();
         stopThread = false;
+        mConnectionCheckerThread.start();
     }
 
     public void removeConnectionChangeListener()    {

@@ -120,7 +120,7 @@ private boolean connectionAvailable = true;
             @Override
             public void onConnectionChanged(boolean isConnectionAvailable) {
                 if(connectionAvailable && !isConnectionAvailable) {
-                    Toast.makeText(MainActivity.this, "No internet connection not available!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Internet connection unavailable!", Toast.LENGTH_SHORT).show();
                     connectionAvailable = false;
                 }
                 else if(!connectionAvailable && isConnectionAvailable) {

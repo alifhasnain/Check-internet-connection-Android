@@ -140,7 +140,7 @@ private boolean connectionAvailable = true;
     }
  ```
  
- You should also remove the listener in your `onStop()` method or it will be keep running on a background thread and waste battery.
+ You should also remove the listener in your `onStop()` method or it will be keep running on a background thread and cause thread leak.
  
  ```java
  @Override

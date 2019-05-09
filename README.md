@@ -5,6 +5,7 @@ Bellow Class will handle internet connection availability in background. Create 
 ### CheckInternetConnection.java
 ```java
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
 
 import java.io.IOException;
@@ -16,46 +17,23 @@ public class CheckInternetConnection  {
 
     private ConnectionChangeListener connectionChangeListener;
 
-    private Thread mConnectionCheckerThread;
+    private HandlerThread mHandlerThread;
 
-    private boolean stopThread = false;
+    private Handler mConnectionCheckerHandler;
 
     private int mUpdateInterval = 3000;
 
     public CheckInternetConnection() {
+        initHandler();
+        mConnectionCheckerHandler.post(new ConnectionCheckRunnable());
+    }
 
-        mConnectionCheckerThread = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                sleep(1000);
-
-                while (!stopThread)    {
-                    try {
-                        int timeoutMs = 1500;
-                        Socket sock = new Socket();
-                        SocketAddress sockaddr = new InetSocketAddress("8.8.8.8", 53);
-
-                        sock.connect(sockaddr, timeoutMs);
-                        sock.close();
-
-                        updateListenerInMainThread(true);
-
-                        sleep(mUpdateInterval);
-
-                    } catch (IOException e) {
-
-                        updateListenerInMainThread(false);
-
-                        sleep(mUpdateInterval);
-                    }
-                }
-            }
-        });
-
-        mConnectionCheckerThread.setPriority(3);
-
+    private void initHandler() {
+        mHandlerThread = new HandlerThread("MyHandlerThread");
+        mHandlerThread.setPriority(3);
+        mHandlerThread.start();
+        Looper looper = mHandlerThread.getLooper();
+        mConnectionCheckerHandler = new Handler(looper);
     }
 
     public int getUpdateInterval() {
@@ -87,12 +65,42 @@ public class CheckInternetConnection  {
 
     public void addConnectionChangeListener(ConnectionChangeListener connectionChangeListener) {
         this.connectionChangeListener = connectionChangeListener;
-        stopThread = false;
-        mConnectionCheckerThread.start();
+        initHandler();
+        mConnectionCheckerHandler.post(new ConnectionCheckRunnable());
     }
 
     public void removeConnectionChangeListener()    {
-        stopThread = true;
+        mHandlerThread.quit();
+    }
+
+    class ConnectionCheckRunnable implements Runnable  {
+
+        @Override
+        public void run() {
+
+            sleep(1000);
+
+            while (true)    {
+                try {
+                    int timeoutMs = 1500;
+                    Socket sock = new Socket();
+                    SocketAddress sockaddr = new InetSocketAddress("8.8.8.8", 53);
+
+                    sock.connect(sockaddr, timeoutMs);
+                    sock.close();
+
+                    updateListenerInMainThread(true);
+
+                    sleep(mUpdateInterval);
+
+                } catch (IOException e) {
+
+                    updateListenerInMainThread(false);
+
+                    sleep(mUpdateInterval);
+                }
+            }
+        }
     }
 }
 

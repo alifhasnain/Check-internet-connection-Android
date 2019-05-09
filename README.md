@@ -140,12 +140,12 @@ private boolean connectionAvailable = true;
     }
  ```
  
- You should also remove the listener in your `onPause()` and `onStop()` method or it will be keep running on a background thread and waste battery.
+ You should also remove the listener in your `onStop()` method or it will be keep running on a background thread and waste battery.
  
  ```java
  @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         connectionChecker.removeConnectionChangeListener();
     }
  ```

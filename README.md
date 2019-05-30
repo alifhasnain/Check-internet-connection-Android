@@ -23,12 +23,14 @@ public class CheckInternetConnection  {
 
     private int mUpdateInterval = 3000;
 
+    private boolean quite;
+
     public CheckInternetConnection() {
-        initHandler();
-        mConnectionCheckerHandler.post(new ConnectionCheckRunnable());
+
     }
 
     private void initHandler() {
+        quite = false;
         mHandlerThread = new HandlerThread("MyHandlerThread");
         mHandlerThread.setPriority(3);
         mHandlerThread.start();
@@ -70,6 +72,7 @@ public class CheckInternetConnection  {
     }
 
     public void removeConnectionChangeListener()    {
+        quite = true;
         mHandlerThread.quit();
     }
 
@@ -80,7 +83,7 @@ public class CheckInternetConnection  {
 
             sleep(1000);
 
-            while (true)    {
+            while (!quite)    {
                 try {
                     int timeoutMs = 1500;
                     Socket sock = new Socket();
